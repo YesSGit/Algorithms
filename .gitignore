@@ -251,9 +251,11 @@ Backup of *.doc*
 
 # Excel Backup File
 *.xlk
+*.xls*
 
 # PowerPoint temporary
 ~$*.ppt*
+*.ppt*
 
 # Visio autosave temporary files
 *.~vsd*
@@ -284,3 +286,6 @@ Backup of *.doc*
 *.wmv
 
 # End of https://www.gitignore.io/api/text,java,video,audio,macos,images,archives,jetbrains+iml,microsoftoffice
+
+###  "Algorithm" project-related folders and files ###
+Materials/
