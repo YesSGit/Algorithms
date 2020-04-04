@@ -94,15 +94,12 @@ public class Solver {
 
         if (searchNode.board.isGoal()) {
             goalSearchNode = searchNode; // keep the last processed search node (goal) to reconstruct the solution (in case it's resolved via original board)
-            // solutionOrig = solutionTrack(goalSearchNode);
         }
         else { // to meet autograder requirements: if unsolvable - # of moves made = -1;
             goalSearchNode = new SearchNode(searchNode.board, searchNode.prevNode, -1);
-            // solutionOrig = null;
         }
-        /* uncomment next lines for debug */
+        /* uncomment next line for debug */
         // goalSearchTwinNode = searchTwinNode; // keep the last processed search node to reconstruct the solution (in case it's resolved via twin board)
-        // solutionTwin = solutionTrack(searchTwinNode);
     }
 
     // is the initial board solvable?
@@ -119,7 +116,7 @@ public class Solver {
     public Iterable<Board> solution() {
         if (goalSearchNode.board.isGoal())
             return solutionTrack(goalSearchNode);
-        return null; // to meet autograder requirements
+        return null; // to meet autograder requirements in case - no solution for original board
     }
 
     /* use this method for debug */

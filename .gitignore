@@ -289,3 +289,10 @@ Backup of *.doc*
 
 ###  "Algorithm" project-related folders and files ###
 Materials/
+# include *.txt which are input files 
+!8puzzle/puzzle*.txt
+!queues/*.txt
+!percolation/*.txt
+!collinear/*.txt
+!Practice/src/com/uzviz/*.txt
+### End of "Algorithm" project-related folders and files ###
