@@ -1,7 +1,21 @@
 /* *****************************************************************************
- *  Name: Serhii Yeshchenko
- *  Date: Feb'2020
- *  Description:
+ *  Author: Serhii Yeshchenko
+ *  Date: Mar'2020
+ *  Description: Coursera, Algorithm, Part I (by Princeton University)
+ *               Programming assignment of week 4 - 8 Puzzle.
+ *               - Board.java & Solver.java implement solution to the 8-puzzle
+ *               problem that illustrates a general artificial intelligence
+ *               methodology known as the A* search algorithm.
+ *               - Board.java is immutable data type that models an n-by-n board
+ *               with sliding tiles.
+ *               - constructor receives an n-by-n array containing the n2
+ *               integers between 0 and n2 − 1, where 0 represents the blank
+ *               square (also assuming that 2 ≤ n < 128).
+ *
+ *  Compilation:  javac Board.java
+ *  Execution:    java Board < puzzle*.txt
+ *  Dependencies: edu.princeton.cs.algs4.Stack.java, In.java, StdOut.java
+ *                Solver.java
  *****************************************************************************/
 
 import edu.princeton.cs.algs4.Stack;
@@ -11,40 +25,31 @@ import edu.princeton.cs.algs4.StdOut;
 import java.util.Arrays;
 
 public class Board {
-    private static int n;             // size of the game board
-    // private static int tileOneRow, tileOneCol, tileTwoRow, tileTwoCol; // matrix indexes of swapping tiles
-    private int[][] tiles;            // matrix represents initial n-by-n grid of tiles
-    // private int[][] twinTiles;        // matrix represents twin (swapped pair of tiles) n-by-n grid of tile
-    // private static int[][] tilesGoal; // goal board matrix - all tiles are sorted in a row-major order
-    // private static Board goalBoard;   // goal board - instantiated on the 'goal board` matrix
-    private int distanceHamming;      // number of tiles in the wrong position
-    private int distanceManhattan;    // sum of the Manhattan distances (sum of the vertical and horizontal distance) from the tiles to their goal positions
-    private int blankRow, blankCol;   // blank square coordinates on the board
-    // private int valueHashCode;        // computed field (in overriden hashCode method) to assign unequal hash codes to unequal instances of Board
+    private final int n;                 // size of the game board
+    private char[] tiles;                // 1D array which represents initial n-by-n grid of tiles in a row-major order
+    private int distanceHamming;         // number of tiles in the wrong position
+    private int distanceManhattan;       // sum of the Manhattan distances (sum of the vertical and horizontal distance) from the tiles to their goal positions
+    private int blankIndx;               // blank square coordinates on the board
+    // private int valueHashCode;        // computed field (in overriden hashCode method) to assign unequal hash codes to unequal instances of Board (violates assignment requiements)
 
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
         if (tiles == null) throw new IllegalArgumentException();
-
-        /* to delete */
-        // if (tilesGoal == null || tilesGoal.length != tiles.length)
-        //     setGoalTiles(tiles.length);
-
-        setSize(tiles.length);
-
+        n = tiles.length;
         if (n < 2 || n >= 128) throw new IllegalArgumentException("Size of the board is out of range: 2 ≤ n < 128");
 
         // set tiles array wich represents initial board, - ensure Board immutability
-        this.tiles = new int[n][n];
+        this.tiles = new char[n * n];
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++) {
-                if (tiles[i][j] < 0 || tiles[i][j] >= n*n) throw new IllegalArgumentException("Tile's value is out of range: 0 - " + (n*n - 1));
-                this.tiles[i][j] = tiles[i][j];
-                if (this.tiles[i][j] == 0) {
-                    blankRow = i;
-                    blankCol = j;
+                if (tiles[i][j] < 0 || tiles[i][j] >= n * n) throw new IllegalArgumentException("Tile's value is out of range: 0 - " + (n * n - 1));
+                this.tiles[i * n + j] = (char) tiles[i][j];
+                if (tiles[i][j] == 0) {
+                    blankIndx = i * n + j;
+                    //  blankRow = i;
+                    //  blankCol = j;
                 }
             }
         sumOfHamming();   // calculates Humming distance
@@ -52,29 +57,34 @@ public class Board {
 
 
         // calculate hashCode - "equal objects must have equal hash codes"
-        // Note: overidding hashCode violates course reqiurements
+        // Note: overidding hashCode violates assignment reqiurements
         // calcHashCode();
     }
 
-    private static void setSize(int size) {
-        n = size;
+    private Board(char[] tiles) {
+        if (tiles == null) throw new IllegalArgumentException();
+        // setSize(tiles.length);
+        n = (int) Math.sqrt(tiles.length);
+        if (n < 2 || n >= 128) throw new IllegalArgumentException("Size of the board is out of range: 2 ≤ n < 128");
+
+        // set new tiles array
+        this.tiles = new char[n * n];
+        for (int i = 0; i < n * n; i++) {
+            if (tiles[i] >= n * n) throw new IllegalArgumentException(
+                    "Tile's value is out of range: 0 - " + (n * n - 1));
+            this.tiles[i] = tiles[i];
+            if (this.tiles[i] == 0) {
+                blankIndx = i;
+            }
+        }
+        sumOfHamming();   // calculates Humming distance
+        sumOfManhattan(); // calculates Manhattan distance
+
+        // calculate hashCode - "equal objects must have equal hash codes"
+        // Note: overidding hashCode violates assignment reqiurements
+        // calcHashCode();
+
     }
-
-    /* to delete */
-    // private static void setGoalTiles(int size) {
-    //     n = size;
-    //     // set tiles array wich represents the goal board
-    //     tilesGoal = new int[n][n];
-    //     int tileNumber = 1;
-    //     for (int i = 0; i < n; i++) {
-    //         for (int j = 0; j < n; j++)
-    //             tilesGoal[i][j] = tileNumber++;
-    //     }
-    //     tilesGoal[n - 1][n - 1] = 0; // set the blank square
-    //     // goalBoard = new Board(tilesGoal);
-    //     // return tilesGoal;
-    // }
-
 
     // string representation of this board
     public String toString() {
@@ -82,7 +92,7 @@ public class Board {
         s.append(n + "\n");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                s.append(String.format("%2d ", tiles[i][j]));
+                s.append(String.format("%2d ", (int) tiles[i * n + j]));
             }
             s.append("\n");
         }
@@ -101,63 +111,44 @@ public class Board {
     // calculates Humming distance - number of tiles in the wrong position
     private void sumOfHamming() {
         distanceHamming = 0;
-        /* !!! to delete */
-        // if (Arrays.deepEquals(tiles, tilesGoal))
-        //     return; // = 0, current board is equal to the goal board
 
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++) {
-                // compare current tile position with the goal one and avoid blank square
-                // convert current matrix index to 1D: (i * n + j) + 1 - to compare w tile's value
-                if (tiles[i][j] != (i * n + j + 1) && tiles[i][j] != 0)
-                // if (tiles[i][j] != tilesGoal[i][j] && tiles[i][j] != 0)
-                    distanceHamming++;
+        for (int i = 0; i < n * n; i++)
+            // compare current tile position with the goal one and avoid blank square
+            //  '+ 1' - to compare 0-based index w tile's value
+            if (tiles[i] != (i + 1) && tiles[i] != 0) {
+                distanceHamming++;
             }
-        // return distanceHamming;
     }
 
     // sum of Manhattan distances between tiles and goal
     public int manhattan() {
         return distanceManhattan;
     }
-    // calculate Manhattan distance - sum of the vertical and horizontal distance from the tiles to their goal positions
+    // calculate Manhattan distance - sum of the vertical and horizontal distance of tiles to their goal position
     private void sumOfManhattan() {
         distanceManhattan = 0;
-        /* !!! to delete */
-        // if (Arrays.deepEquals(tiles, tilesGoal))
-        //     return; // = 0, current board is equal to the goal board
 
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++) {
-                // compare current tile position with the goal one, avoid blank square
-                // convert current matrix index to 1D (i * n + j) + 1 to compare w tile's value
-                if (tiles[i][j] != (i * n + j + 1) && tiles[i][j] != 0) {
-                    // convert tile`s value from 1D (0-based) representation to 2D (0-based) in row-major(lexicogrphic) order
-                    int row = (tiles[i][j] - 1) / n;    // '-1' - to convert tile value to 0-based 1D array
-                    int column = (tiles[i][j] - 1) % n;
+        for (int i = 0; i < n * n; i++) {
+            // compare current tile position with the goal one, avoid blank square
+            if (tiles[i] != (i + 1) && tiles[i] != 0) { //+ 1 to compare 0-based index w 1-based tile's value
+                // convert tile`s value from 1D (1-based) representation to 2D (0-based) in row-major(lexicogrphic) order
+                int row = (tiles[i] - 1) / n;    // '-1' - to convert tile value to 0-based index value
+                int column = (tiles[i] - 1) % n;
+                // define 2D goal indexes
+                int goalI = i / n;
+                int goalJ = i % n;
+                // calculate Manhattan distance for the current tile
+                int dist = Math.abs(goalI - row) + Math.abs(goalJ - column);
 
-                    distanceManhattan = distanceManhattan + Math.abs(i - row) + Math.abs(j - column);
-                }
+                distanceManhattan = distanceManhattan + dist;
             }
-        // return distanceManhattan;
+        }
     }
 
     // is this board the goal board?
     public boolean isGoal() {
-        /* !!! to delete */
-        // setGoalBoard();
-        // return Arrays.deepEquals(this.tiles, tilesGoal);
-        // return this.equals(goalBoard);
-
         return (this.distanceManhattan == 0 && this.distanceHamming == 0);
     }
-
-    /* !!! to delete */
-    // private void setGoalBoard() {
-    //     if (goalBoard == null || goalBoard.tiles.length != n) {
-    //         goalBoard = new Board(tilesGoal);
-    //     }
-    // }
 
     // does this board equal other?
     /**
@@ -172,7 +163,7 @@ public class Board {
         if (other == null) return false;
         if (other.getClass() != this.getClass()) return false;
         Board that = (Board) other;
-        return Arrays.deepEquals(this.tiles, that.tiles) &&
+        return Arrays.equals(this.tiles, that.tiles) &&
                 this.distanceManhattan == that.distanceManhattan &&
                 this.distanceHamming == that.distanceHamming &&
                 this.dimension() == that.dimension();
@@ -182,6 +173,8 @@ public class Board {
      *
      * @return an integer hash code for this board
      */
+    // Note: overidding hashCode violates assignment reqiurements
+
     // @Override
     // private int hashCode() {
     //     if (this.tiles == null) return 0;
@@ -200,115 +193,73 @@ public class Board {
     //     valueHashCode = valueHashCode + Integer.hashCode(distanceManhattan) + Integer.hashCode(distanceHamming);
     // }
 
-    // all neighboring boards
+    // collect all neighboring boards
     public Iterable<Board> neighbors() {
+        // convert 1D blank tile index into 2d matrix format [row][col] to fаcilitate collection of neighbors
+         int blankRow = blankIndx / n;
+         int blankCol = blankIndx % n;
         Stack<Board> neighborBoards; // all neighbors of the current search board
         neighborBoards = new Stack<>();
         if (blankRow - 1 >= 0) { // exchange a blank square with the tile above
-            tiles[blankRow][blankCol] = tiles[blankRow - 1][blankCol];
-            tiles[blankRow - 1][blankCol] = 0;
+            tiles[blankIndx] = tiles[(blankRow - 1) * n + blankCol];
+            tiles[(blankRow - 1) * n + blankCol] =  0;
             Board neighborBoard = new Board(this.tiles);
             neighborBoards.push(neighborBoard);
-            tiles[blankRow - 1][blankCol] = tiles[blankRow][blankCol];
-            tiles[blankRow][blankCol] = 0;
+            tiles[(blankRow - 1) * n + blankCol] = tiles[blankIndx];
+            tiles[blankIndx] = 0;
         }
         if (blankRow + 1 < n) { // exchange a blank square with the tile below
-            tiles[blankRow][blankCol] = tiles[blankRow + 1][blankCol];
-            tiles[blankRow + 1][blankCol] = 0;
+            tiles[blankIndx] = tiles[(blankRow + 1) * n + blankCol];
+            tiles[(blankRow + 1) * n + blankCol] =  0;
             Board neighborBoard = new Board(this.tiles);
             neighborBoards.push(neighborBoard);
-            tiles[blankRow + 1][blankCol] = tiles[blankRow][blankCol];
-            tiles[blankRow][blankCol] = 0;
+            tiles[(blankRow + 1) * n + blankCol] = tiles[blankIndx];
+            tiles[blankIndx] = 0;
         }
         if (blankCol - 1 >= 0) { // exchange a blank square with the tile on the left
-            tiles[blankRow][blankCol] = tiles[blankRow][blankCol - 1];
-            tiles[blankRow][blankCol - 1] = 0;
+            tiles[blankIndx] = tiles[blankRow * n + (blankCol - 1)];
+            tiles[blankRow * n + (blankCol - 1)] =  0;
             Board neighborBoard = new Board(this.tiles);
             neighborBoards.push(neighborBoard);
-            tiles[blankRow][blankCol - 1] = tiles[blankRow][blankCol];
-            tiles[blankRow][blankCol] = 0;
+            tiles[blankRow * n + (blankCol - 1)] = tiles[blankIndx];
+            tiles[blankIndx] = 0;
         }
         if (blankCol + 1 < n) { // exchange a blank square with the tile on the right
-            tiles[blankRow][blankCol] = tiles[blankRow][blankCol + 1];
-            tiles[blankRow][blankCol + 1] = 0;
+            tiles[blankIndx] = tiles[blankRow * n + (blankCol + 1)];
+            tiles[blankRow * n + (blankCol + 1)] =  0;
             Board neighborBoard = new Board(this.tiles);
             neighborBoards.push(neighborBoard);
-            tiles[blankRow][blankCol + 1] = tiles[blankRow][blankCol];
-            tiles[blankRow][blankCol] = 0;
+            tiles[blankRow * n + (blankCol + 1)] = tiles[blankIndx];
+            tiles[blankIndx] = 0;
         }
         return neighborBoards;
     }
 
     // a board that is obtained by exchanging of any pair of tiles
     public Board twin() {
-        int tileOneRow, tileOneCol, tileTwoRow, tileTwoCol; // matrix indexes of swapping tiles
-        // !!! - to delete if (twinTiles == null) throw new IllegalArgumentException("No tiles array to create twin board.");
-
-        // define indexes of two tiles to be swapped -
-        // !!! - to delete twinTilesIndxs(blankRow * n + blankCol); // param - is 1D index of blank square
-
-        // obtain pair of tales to be swapped for twin board
-        // first: convert 2D indexes of blank square into 1D index
-        int blank1Dindx = blankRow * n + blankCol;
-        // then: shift from blank square index to define at least two tiles
-        //       for swapping and convert their indexes back to 2D
-        if (n * n - blank1Dindx > 2) {        // to ensure there are at least two tiles for swapping
-            tileOneRow = (blank1Dindx + 1) / n;
-            tileOneCol = (blank1Dindx + 1) % n;
-            tileTwoRow = (blank1Dindx + 2) / n;
-            tileTwoCol = (blank1Dindx + 2) % n;
+        int tileOne, tileTwo; // 1D indexes of swapping tiles
+        // obtain pair of tales to be swapped to create a twin board
+        // shift from blank square index to define at least two tiles for swapping
+        if (n * n - blankIndx > 2) {        // to ensure there are at least two tiles for swapping
+            tileOne = blankIndx + 1;
+            tileTwo = blankIndx + 2;
         } else {
-            tileOneRow = (blank1Dindx - 1) / n;
-            tileOneCol = (blank1Dindx - 1) % n;
-            tileTwoRow = (blank1Dindx - 2) / n;
-            tileTwoCol = (blank1Dindx - 2) % n;
+            tileOne = blankIndx - 1;
+            tileTwo = blankIndx - 2;
         }
 
-        // swapping tiles
-        int tmpBlock = tiles[tileOneRow][tileOneCol];
-        tiles[tileOneRow][tileOneCol] = tiles[tileTwoRow][tileTwoCol];
-        tiles[tileTwoRow][tileTwoCol] = tmpBlock;
-
+        // swapping tiles (inside initial tiles[] array)
+        char tmpBlock = tiles[tileOne];
+        tiles[tileOne] = tiles[tileTwo];
+        tiles[tileTwo] = tmpBlock;
+        // create a twin board
         Board twinBoard = new Board(tiles);
-
-        tiles[tileTwoRow][tileTwoCol] = tiles[tileOneRow][tileOneCol];
-        tiles[tileOneRow][tileOneCol] = tmpBlock;
+        // swapping back to restore initial tiles[] array
+        tiles[tileTwo] = tiles[tileOne];
+        tiles[tileOne] = tmpBlock;
 
         return twinBoard;
     }
-
-    // private  static void twinTilesIndxs(int blank1Dindx) {
-    //     // tiles matrix of twin board
-    //
-    //     /* !!! twinTiles - to be eliminated from the Board */
-    //     // twinTiles = new int[n][n];
-    //     // for (int i = 0; i < n; i++)
-    //     //     for (int j = 0; j < n; j++)
-    //     //         twinTiles[i][j] = tiles[i][j];
-    //
-    //     // obtain pair of tales to be swapped for twin board
-    //     // first: convert 2D indexes of blank square into 1D index
-    //     /* int blank1Dindx = blankRow * n + blankCol; */
-    //     // then: shift from blank square index to ensure at least two tiles
-    //     //       for swapping and convert their indexes back to 2D
-    //     if (n * n - blank1Dindx > 2) {        // to ensure there are at least two tiles for swapping
-    //         tileOneRow = (blank1Dindx + 1) / n;
-    //         tileOneCol = (blank1Dindx + 1) % n;
-    //         tileTwoRow = (blank1Dindx + 2) / n;
-    //         tileTwoCol = (blank1Dindx + 2) % n;
-    //     } else {
-    //         tileOneRow = (blank1Dindx - 1) / n;
-    //         tileOneCol = (blank1Dindx - 1) % n;
-    //         tileTwoRow = (blank1Dindx - 2) / n;
-    //         tileTwoCol = (blank1Dindx - 2) % n;
-    //     }
-    //
-    //     /* !!! to be deleted */
-    //     // swapping tiles
-    //     // int tmpBlock = twinTiles[tileOneRow][tileOneCol];
-    //     // twinTiles[tileOneRow][tileOneCol] = twinTiles[tileTwoRow][tileTwoCol];
-    //     // twinTiles[tileTwoRow][tileTwoCol] = tmpBlock;
-    // }
 
     // unit testing
     public static void main(String[] args) {

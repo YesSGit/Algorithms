@@ -7,5 +7,8 @@
     <excludeFilterFiles>
       <filter file="$PROJECT_DIR$/.lift/spotbugs.xml" enabled="true" />
     </excludeFilterFiles>
+    <detectors>
+      <detector name="FindCircularDependencies" enabled="true" />
+    </detectors>
   </component>
 </project>

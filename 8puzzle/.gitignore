@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/text,java,video,audio,macos,images,archives,jetbrains+iml,microsoftoffice
 # Edit at https://www.gitignore.io/?templates=text,java,video,audio,macos,images,archives,jetbrains+iml,microsoftoffice
 
@@ -284,3 +283,13 @@ Backup of *.doc*
 *.wmv
 
 # End of https://www.gitignore.io/api/text,java,video,audio,macos,images,archives,jetbrains+iml,microsoftoffice
+
+### Java projects' related section ###
+# include *.txt which are input files 
+!8puzzle/puzzle*.txt
+!queues/*.txt
+!percolation/*.txt
+!collinear/*.txt
+!Practice/src/com/uzviz/*.txt
+
+### End of Java projects' related section ###

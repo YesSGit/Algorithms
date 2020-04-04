@@ -1,4 +1,5 @@
 /******************************************************************************
+ *  Author: Princeton University
  *  Compilation:  javac-algs4 PuzzleChecker.java
  *  Execution:    java-algs4 PuzzleChecker filename1.txt filename2.txt ...
  *  Dependencies: Board.java Solver.java
@@ -48,10 +49,10 @@ public class PuzzleChecker {
             // solve the slider puzzle
             Board initial = new Board(tiles);
             Solver solver = new Solver(initial);
-            // StdOut.println("=> " + filename + ": " + solver.moves());
 
             if (!solver.isSolvable()) {
-                StdOut.println("No solution possible");
+                StdOut.println("No solution possible. Resolved via twin board:");
+                StdOut.println("=> " + filename);
             }
             else {
                 StdOut.println("Solved!");

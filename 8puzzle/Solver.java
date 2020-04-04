@@ -1,7 +1,22 @@
 /* *****************************************************************************
- *  Name: Serhii Yeshchenko
- *  Date: Feb'2020
- *  Description:
+ *  Author: Serhii Yeshchenko
+ *  Date: Mar'2020
+ *  Description: Coursera, Algorithm, Part I (by Princeton University)
+ *               Programming assignment of week 4 - 8 Puzzle.
+ *               - Solver.java & Board.java implement solution to the 8-puzzle
+ *               problem that illustrates a general artificial intelligence
+ *               methodology known as the A* search algorithm.
+ *               This program creates an initial board from filename specified
+ *               on the command line and finds the minimum number of moves to
+ *               reach the goal state.
+ *               - Static nested class SearchNode defines a search node of the
+ *               game to be a board, the number of moves made to reach the board,
+ *               and the previous search node.
+ *
+ *  Compilation:  javac Solver.java
+ *  Execution:    java Solver < puzzle*.txt
+ *  Dependencies: edu.princeton.cs.algs4.MinPQ, Stack.java, In.java, StdOut.java
+ *                Board.java
  **************************************************************************** */
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.Stack;
@@ -10,120 +25,88 @@ import edu.princeton.cs.algs4.In;
 
 public class Solver {
     private final SearchNode goalSearchNode;
-    private final Iterable<Board> solutionOrig, solutionTwin;
+    // private final SearchNod goalSearchTwinNode // - use this instance variable for debug
+
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         if (initial == null) throw new IllegalArgumentException("No valid argument to the Solver constructor.");
 
-        // !!! to - delete
-        // setGoalBoard(initial.dimension());
-        // set tiles array wich represents the goal board matrix
-        // - all tiles are sorted in a row-major order
-        /*
-        int size = initial.dimension();
-        int[][] tilesGoal = new int[size][size];
-        int tileNumber = 1;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++)
-                tilesGoal[i][j] = tileNumber++;
-        }
-        tilesGoal[size - 1][size - 1] = 0; // set the blank square
-        // goal board - instantiated on the 'goal board` matrix
-        Board goalBoard = new Board(tilesGoal);
-         */
-
-
-        int movesOrig = 0;
-        int movesTwin = 0;
-
-        SearchNode prevSearchNode = null;
-        SearchNode searchNode = new SearchNode(initial, prevSearchNode, movesOrig);
+        // SearchNode prevSearchNode = null;
+        SearchNode searchNode = new SearchNode(initial, null, 0);
         MinPQ<SearchNode> minPQ = new MinPQ<>();
         minPQ.insert(searchNode);
 
         Board twinBoard = initial.twin();
-        SearchNode prevTwinSearchNode = null;
-        SearchNode searchTwinNode = new SearchNode(twinBoard, prevTwinSearchNode, movesTwin);
+        // SearchNode prevTwinSearchNode = null;
+        SearchNode searchTwinNode = new SearchNode(twinBoard, null, 0);
         MinPQ<SearchNode> minTwinPQ = new MinPQ<>();
         minTwinPQ.insert(searchTwinNode);
 
-        // int step = 0; // solution trace step - for debug
+        // int step = 0; // solution trace step - uncomment for debug
 
         // main solver iteration cycle:
         // continues until a search node, either of original board or twin, is equal to goal board or until the queue is empty.
         while (!minPQ.isEmpty() && !minTwinPQ.isEmpty()) {
 
-                // print PQ staff (all search nodes) before dequeue - for debug
+            // print PQ staff (all search nodes) before dequeue - for debug
             // printPQ(minPQ, searchNode, step, "*******************  PQ staff (Original board)");
 
             searchNode = minPQ.delMin();
             if (searchNode.board.isGoal()) break;
-
-            prevSearchNode = searchNode.prevNode; // keep previous `search node` for critical optimazation
-
-            movesOrig = searchNode.moveNmbr;
-            movesOrig++;
             // Original board:
             // collect all neighbors of the current board, create corresponding search node and add them to PQ
             for (Board board : searchNode.board.neighbors()) {
-                SearchNode neighborNode = new SearchNode(board, searchNode, movesOrig);
-                // proceed' while there is a neighbor (at least one) with equal priority to the current searchnode (if less,- something is wrong!),
+                SearchNode neighborNode = new SearchNode(board, searchNode, searchNode.moveNmbr + 1);
+                // proceed while there is a neighbor (at least one) with equal or higher priority to the current searchnode (if less,- something is wrong!),
                 // - goal node has the lowest priority than any nodes in the PQ
                 if (searchNode.priorityManhattan <= neighborNode.priorityManhattan) {
                     // critical optimization:
                     // don’t enqueue a neighbor if its board is the same as the board of the previous search node.
-                    if (prevSearchNode != null) { // case for the initial board
-                        if (!prevSearchNode.board.equals(neighborNode.board))
+                    if (searchNode.prevNode != null) { // case for the initial board
+                        if (!searchNode.prevNode.board.equals(neighborNode.board))
                             minPQ.insert(neighborNode);
                     } else minPQ.insert(neighborNode);
                 }
             }
-            // prevSearchNode = searchNode; // keep previous `search node` for critical optimazation
 
-                // print PQ staff (all search nodes) before dequeue - for debug
-                // printPQ(minTwinPQ, searchTwinNode, step, "*******************  PQ staff (Twin board)");
+            // print PQ staff (all search nodes) before dequeue - for debug
+            // printPQ(minTwinPQ, searchTwinNode, step, "*******************  PQ staff (Twin board)");
 
             searchTwinNode = minTwinPQ.delMin();
             if (searchTwinNode.board.isGoal()) break;
-
-            prevTwinSearchNode = searchTwinNode.prevNode;
-
-            movesTwin = searchTwinNode.moveNmbr;
-            movesTwin++;
             // Twin board:
-            // collect all neighbors of the current board, create corrsponding search node and add them to PQ
+            // collect all neighbors of the current board, create corresponding search node and add them to PQ
             for (Board board : searchTwinNode.board.neighbors()) {
-                SearchNode neighborNode = new SearchNode(board, searchTwinNode, movesTwin);
-                // `proceed' while there is a neighbor (at least one) with equal priority to the current searchnode (if less,- something is wrong!),
+                SearchNode neighborNode = new SearchNode(board, searchTwinNode, searchTwinNode.moveNmbr + 1);
+                // proceed while there is a neighbor (at least one) with equal or higher priority to the current searchnode (if less,- something is wrong!),
                 // - goal node has the lowest priority than any nodes in the PQ
                 if (searchTwinNode.priorityManhattan <= neighborNode.priorityManhattan) {
                     // critical optimization:
                     // don’t enqueue a neighbor if its board is the same as the board of the previous search node.
-                    if (prevTwinSearchNode != null) { // case for the initial board
-                        if (!prevTwinSearchNode.board.equals(neighborNode.board))
+                    if (searchTwinNode.prevNode != null) { // case for the initial board
+                        if (!searchTwinNode.prevNode.board.equals(neighborNode.board))
                             minTwinPQ.insert(neighborNode);
                     } else minTwinPQ.insert(neighborNode);
                 }
             }
-            // prevTwinSearchNode = searchTwinNode; // keep previous `search node` for critical optimazation
-
             // step++; // for debug
         }
 
         if (searchNode.board.isGoal()) {
-            goalSearchNode = searchNode;
-            solutionOrig = solutionTrack(goalSearchNode);
+            goalSearchNode = searchNode; // keep the last processed search node (goal) to reconstruct the solution (in case it's resolved via original board)
+            // solutionOrig = solutionTrack(goalSearchNode);
         }
-        else { // to meet autograder requirements
+        else { // to meet autograder requirements: if unsolvable - # of moves made = -1;
             goalSearchNode = new SearchNode(searchNode.board, searchNode.prevNode, -1);
-            solutionOrig = null;
+            // solutionOrig = null;
         }
-        solutionTwin = solutionTrack(searchTwinNode);
+        /* uncomment next lines for debug */
+        // goalSearchTwinNode = searchTwinNode; // keep the last processed search node to reconstruct the solution (in case it's resolved via twin board)
+        // solutionTwin = solutionTrack(searchTwinNode);
     }
 
     // is the initial board solvable?
     public boolean isSolvable() {
-
         return goalSearchNode.board.isGoal();
     }
 
@@ -134,12 +117,16 @@ public class Solver {
 
     // sequence of boards (beginning from original one) in a shortest solution
     public Iterable<Board> solution() {
-        return solutionOrig;
+        if (goalSearchNode.board.isGoal())
+            return solutionTrack(goalSearchNode);
+        return null; // to meet autograder requirements
     }
+
+    /* use this method for debug */
     // sequence of boards (beginning from twin of original board) in a shortest solution
-    private Iterable<Board> solutionTwin() {
-        return solutionTwin;
-    }
+    // private Iterable<Board> solutionTwin() {
+    //     return solutionTrack(goalSearchTwinNode);
+    // }
 
     private Iterable<Board> solutionTrack(SearchNode goalNode) {
         if (goalNode == null) throw new IllegalArgumentException("Solution reconstruction failure - goal search node is null.");
@@ -152,24 +139,7 @@ public class Solver {
         return stack;
     }
 
-    /* !!! - to delete
-    // set tiles array wich represents the goal board
-    private void setGoalBoard(int size) {
-        // goal board matrix - all tiles are sorted in a row-major order
-        int[][] tilesGoal = new int[size][size];
-        int tileNumber = 1;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++)
-                tilesGoal[i][j] = tileNumber++;
-        }
-        tilesGoal[size - 1][size - 1] = 0; // set the blank square
-        goalBoard = new Board(tilesGoal);
-        // return tilesGoal;
-    }
-
-     */
-
-    // helper functions
+    // print MinPQ stuff - method for debug purpose
     /*
     private void printPQ(MinPQ<SearchNode> minPQ, SearchNode currSearchNode, int step, String title) {
         StdOut.println(title);
@@ -191,18 +161,20 @@ public class Solver {
         }
     }
      */
-    private class SearchNode implements Comparable<SearchNode> {
+    private static class SearchNode implements Comparable<SearchNode> {
         private final Board board;                // search node of the game
         private final SearchNode prevNode;        // previous search node
         private final int moveNmbr;               // number of moves made so far to get to the search node
         private final int priorityManhattan;
+        private final int distanceManhattan;
 
         private SearchNode(Board currBoard, SearchNode prevSearchNode, int movesMade) {
             board = currBoard;
             prevNode = prevSearchNode; // make a linked-list of all dequeued search nodes to reconstruct the solution -
-            // chase the pointers all the way back to the initial search node
+                                       // chase the pointers all the way back to the initial search node
             moveNmbr = movesMade;
-            priorityManhattan = board.manhattan() + moveNmbr;
+            distanceManhattan = board.manhattan();            // calc & cache the value to avoid extra cost during cycling calculation
+            priorityManhattan = distanceManhattan + moveNmbr;
         }
 
         /**
@@ -218,9 +190,9 @@ public class Solver {
         public int compareTo(SearchNode that) {
             if (this.priorityManhattan < that.priorityManhattan) return -1;
             else if (this.priorityManhattan > that.priorityManhattan) return +1;
-            else if (this.board.manhattan() < that.board.manhattan()) return -1; // tie breaks by manhattan distance
-            else if (this.board.manhattan() > that.board.manhattan()) return +1;
-            // else if (this.board.hamming() < that.board.hamming()) return -1;
+            else if (this.distanceManhattan < that.distanceManhattan) return -1; // tie breaks by manhattan distance
+            else if (this.distanceManhattan > that.distanceManhattan) return +1;
+            // else if (this.board.hamming() < that.board.hamming()) return -1;  // using humming() violates assignment requirements
             // else if (this.board.hamming() > that.board.hamming()) return +1;
             else return 0;
         }
@@ -228,7 +200,6 @@ public class Solver {
 
     // test client
     public static void main(String[] args) {
-
         // create initial board from file
         In in = new In(args[0]);
         String filename = args[0];
@@ -246,8 +217,8 @@ public class Solver {
         // print solution to standard output
         if (!solver.isSolvable()) {
             StdOut.println("No solution possible. Resolved via twin board:");
-            for (Board board : solver.solutionTwin())
-                StdOut.println(board);
+            // for (Board board : solver.solutionTwin())
+            //     StdOut.println(board);
         }
         else {
             StdOut.println("Solved!");
