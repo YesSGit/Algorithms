@@ -153,7 +153,10 @@ public class PointDebug implements Comparable<PointDebug> {
         PointDebug pointP = new PointDebug(10499, 29557);
         PointDebug pointQ = new PointDebug(10499, 29481);
 
-        System.out.println(ObjectSizeFetcher.getObjectSize(pointP));
+        // System.out.println(ObjectSizeFetcher.getObjectSize(pointP));
+        pointP.drawTo(pointQ);
+        StdDraw.show();
+        // pointQ.draw();
 
         slope = pointP.slopeTo(pointQ);
         StdOut.println("slope between P" + pointP.toString() + " and Q" + pointQ.toString() + " : " + slope);
