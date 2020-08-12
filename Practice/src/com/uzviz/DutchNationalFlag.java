@@ -19,7 +19,7 @@
  *               to the key (white) and greater than the key (blue).
  * Dependencies: Pebble.java
  *  <p>
- *  Coursera, ALGORITHM Part I, week 2, Quiz 2 (Elementary sorts)
+ *  Coursera, ALGORITHM Part I, week 2, Interview questions (Elementary sorts)
  **************************************************************************** */
 package com.uzviz;
 
@@ -32,12 +32,11 @@ public final class DutchNationalFlag implements Iterable<Comparable>
 {
     private static Comparable[] a;
     /**
-     * Sorts .
+     * Sorts pebbles such that all of the same color are together and
+     * their collective color groups are in the correct order.
      *
      * @param  pebbles the array of red, white or blue pebbles
-     * @throws IllegalArgumentException if {@code pebbles} is {@code null}
-     * @throws IllegalArgumentException if any entry in {@code pebbles[]} is {@code null}
-     * @throws IllegalArgumentException if {@code pebbles.length} is {@code 0}
+     * @param key the key to group items in three-way partitioning function
      */
 
     private DutchNationalFlag(Comparable[] pebbles, Comparable key) {
@@ -46,9 +45,21 @@ public final class DutchNationalFlag implements Iterable<Comparable>
         threeWayPartion(pebbles, key);
     }
 
+    /**
+     * To ensure immutability add public static factory to call private constructor;
+     * check arguments against any possible IllegalArgumentException.
+     *
+     * @param array the array of red, white or blue pebbles
+     * @param mid the key to group items in three-way partitioning function
+     * @throws IllegalArgumentException if {@code pebbles} is {@code null}
+     * @throws IllegalArgumentException if any entry in {@code pebbles[]} is {@code null}
+     * @throws IllegalArgumentException if {@code pebbles.length} is {@code 0}
+     * @throws IllegalArgumentException if {@code mid} is {@code null}
+     */
     public static DutchNationalFlag valueOf(Comparable[] array, Comparable mid) {
-        if (array == null) throw new IllegalArgumentException("Arguments is null");
+        if (array == null) throw new IllegalArgumentException("Argument is null");
         if (array.length == 0) throw new IllegalArgumentException("Array is of length 0");
+        if (mid == null) throw new IllegalArgumentException("Argument is null");
 
         // defensive copy of input array
         a = new Comparable[array.length];
@@ -57,7 +68,6 @@ public final class DutchNationalFlag implements Iterable<Comparable>
                 throw new IllegalArgumentException("array[" + i + "] is null");
             a[i] = array[i];
         }
-
         return new DutchNationalFlag(a, mid);
     }
 

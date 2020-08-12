@@ -13,7 +13,7 @@
  *  Property:
  *            For more general applications - input arrays can be of type Comparable
  *            and of different length;
- *            to gain performance - the smallest is sorted out before the binary
+ *            to gain performance - the smallest array is sorted out before the binary
  *            search inside the another one.
  *  <p>
  *  Coursera, ALGORITHM Part I, week 2, Quiz 2 (Elementary sorts)
@@ -30,14 +30,7 @@ public final class Intersections2Sets {
      *
      * @param  pointsA the array of 2D-points
      * @param  pointsB the array of 2D-points
-     * @throws IllegalArgumentException if {@code pointsA} is {@code null}
-     * @throws IllegalArgumentException if {@code pointsB} is {@code null}
-     * @throws IllegalArgumentException if any entry in {@code pointsA[]} is {@code null}
-     * @throws IllegalArgumentException if any entry in {@code pointsB[]} is {@code null}
-     * @throws IllegalArgumentException if {@code pointsA.length} is {@code 0}
-     * @throws IllegalArgumentException if {@code pointsB.length} is {@code 0}
      */
-
     private Intersections2Sets(Comparable[] pointsA, Comparable[] pointsB) {
         if (pointsA.length < pointsB.length)
             SearchIntersection(pointsA, pointsB);
@@ -45,8 +38,21 @@ public final class Intersections2Sets {
             SearchIntersection(pointsB, pointsA);
     }
 
+    /**
+     * To ensure immutability, add public static factory to call private constructor;
+     * check arguments against any possible IllegalArgumentException.
+     *
+     * @param  pointsA the array of Comparable items
+     * @param  pointsB the array of Comparable items
+     * @throws IllegalArgumentException if {@code pointsA} is {@code null}
+     * @throws IllegalArgumentException if {@code pointsB} is {@code null}
+     * @throws IllegalArgumentException if any entry in {@code pointsA[]} is {@code null}
+     * @throws IllegalArgumentException if any entry in {@code pointsB[]} is {@code null}
+     * @throws IllegalArgumentException if {@code pointsA.length} is {@code 0}
+     * @throws IllegalArgumentException if {@code pointsB.length} is {@code 0}
+     */
     public static Intersections2Sets valueOf(Comparable[] pointsA, Comparable[] pointsB) {
-        if (pointsA == null || pointsB == null) throw new IllegalArgumentException("Arguments is null");
+        if (pointsA == null || pointsB == null) throw new IllegalArgumentException("Argument is nul");
         if (pointsA.length == 0 || pointsB.length == 0) throw new IllegalArgumentException("Array is of length 0");
 
         // defensive copy of input arrays
@@ -71,8 +77,7 @@ public final class Intersections2Sets {
     private Stack<Comparable> SearchIntersection(Comparable[] sortArr, Comparable[] searchArr) {
         Shell.sort(sortArr); // sort the shortest of two array (sort method from com.uzviz.Shell class)
         for (Comparable p : searchArr) {
-            // collects
-            //items that are contained in both arrays
+            // collect items that are contained in both arrays
             if (BinarySearchComparable.indexOf(sortArr, p) != -1) intersectionSet.push(p);
         }
         return intersectionSet;

@@ -295,4 +295,6 @@ Materials/
 !percolation/*.txt
 !collinear/*.txt
 !Practice/src/com/uzviz/*.txt
+# include Interview Questions_*.pdf files
+!Practice/src/com/uzviz/Interview Questions_*.pdf
 ### End of "Algorithm" project-related folders and files ###
