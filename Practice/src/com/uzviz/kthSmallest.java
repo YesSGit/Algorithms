@@ -3,15 +3,15 @@
  *  findKth() function code fragment - https://stackoverflow.com/a/40190231
  *  by @author Kaidul https://stackoverflow.com/users/1162233/kaidul?tab=profile
  *  Date: Jul'2020
- *  Description: Given two sorted arrays of integers a[] and b[], of lengths n1
- *               and n2 and an integer 0≤k<n1+n2, kthSmallest.java finds a key
- *               of rank k.
+ *  Description: Given two sorted arrays of integers a[] and b[], of lengths n1
+ *               and n2 and an integer 0≤k<n1+n2, kthSmallest.java finds a key
+ *               of rank k.
  *
- *  Performance: The order of growth of the worst case running time is logn,
- *               where n=n1+n2.
+ *  Performance: The order of growth of the worst case running time is logn,
+ *               where n=n1+n2.
  *
- *  Property:    Length of arrays a[] and b[] - not equal;
- *               rank of k - any integer from 0≤k<n1+n2; also, k>0;
+ *  Property:    Length of arrays a[] andb[] - not equal;
+ *               rank of k - any integer from 0≤k<n1+n2; also, k>0;
  *               arrays are intersected;
  * Dependencies:
  *  <p>

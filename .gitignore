@@ -287,6 +287,11 @@ Backup of *.doc*
 
 # End of https://www.gitignore.io/api/text,java,video,audio,macos,images,archives,jetbrains+iml,microsoftoffice
 
+### Additionally covers JetBrains IDEs (avoid IDEs specific stuff for "Algorithm" project
+.idea/
+.lift/
+### End "Additionally covers JetBrains IDEs"
+
 ###  "Algorithm" project-related folders and files ###
 Materials/
 # include *.txt which are input files 
