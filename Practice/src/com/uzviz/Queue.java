@@ -60,6 +60,18 @@ public class Queue<Item> implements Iterable<Item>
             return item;
         }
     }
+    /**
+     * Returns a string representation of this queue.
+     *
+     * @return the sequence of items in FIFO order, separated by spaces
+     */
+    public String toString()
+    {
+       StringBuilder sb = new StringBuilder();
+       for (Item item : this)
+           sb.append(item).append(" ");
+        return sb.toString();
+    }
     public static void main(String[] args)
     {
         In in = new In(args[0]);      // input file Queue_input.txt

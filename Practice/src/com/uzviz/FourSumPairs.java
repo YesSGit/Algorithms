@@ -49,12 +49,7 @@ import java.util.Arrays;
  *  @author Serhii Yeshchenko
  *  Date: Jun'2023
  */
-
 public class FourSumPairs {
- /**
- *  Given an array {@code a[]} of {@code n} integers, collect distinct indices {@code i,j,k} and {@code l}
- * such that {@code a[i]+a[j] = a[k]+a[l]}.
- */
     public static Iterable<String> indices(int[] a) {
         int N = a.length;
         SeparateChainingHashST<Integer, Integer[]> st = new SeparateChainingHashST<>();
