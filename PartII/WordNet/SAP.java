@@ -14,10 +14,11 @@ import java.util.Set;
 /**
  *  The {@code SAP} class represents an immutable data type for finding a Shortest Ancestral Path (SAP)
  *  and Shortest Common Ancestor (SCA) for a given directed graph.
- *
+ * <p>
  *  An ancestral path between two vertices <i>v</i> and <i>w</i> is a directed path from <i>v</i> to
  *  a common ancestor <i>x</i>, together with a directed path from <i>w</i> to the same ancestor <i>x</i>.
- *  A shortest ancestral path is an ancestral path of minimum total length.
+ *  The shortest ancestral path is an ancestral path of minimum total length. <p>
+ *  The underlying digraph is immutable within this data type; implementation may cache recent results.
  *
  *  <p><b>Performance requirements:</b></p>
  *  <ul>
@@ -47,13 +48,11 @@ public class SAP {
     private final WordNetBFS sapBFS_B;
     private final int numberOfVertices;           // number of vertices in this digraph
     private int shortestCommonAncestor = -1;      // a vertex which is a shortest common ancestor of <i>v</i> and <i>w</i>
-    // private int cachV = -1;                       // vertices of a digraph used recently in computation of length() and ancestor() (to implement a cache)
-    // private int cachW = -1;
     private Iterable<Integer> V_subset, W_subset; // subsets of vertices of a digraph used recently in computation of length() and ancestor()
     private int lengthSAP = INFINITY;             // length of shortest ancestral path between <i>v</i> and <i>w</i>
 
     // for debug purpose
-    // private String graphInDOT;  //  representation of digraph in DOT format
+    // private String graphInDOT;  // representation of digraph in DOT format
 
     /**
      * Initializes a {@code SAP} object for the specified directed graph.
@@ -91,10 +90,7 @@ public class SAP {
         validateVertex(v);
         validateVertex(w);
 
-        // if ((v == cachV &&  w == cachW) || (v == cachW && w == cachV)) return lengthSAP == INFINITY ? -1 : lengthSAP;
         if (v == w) return 0;
-        // cachV = v;
-        // cachW = w;
 
         Bag<Integer> subsetA, subsetB;
         subsetA = new Bag<>();
@@ -102,21 +98,17 @@ public class SAP {
         subsetA.add(v);
         subsetB.add(w);
 
-        // length(subsetA, subsetB);
-
-        // lengthSAP = INFINITY;
-        // shortestCommonAncestor = -1;
         runBFS(subsetA, subsetB);
         return lengthSAP == INFINITY ? -1 : lengthSAP;
     }
 
     /**
-     * Computes length of a shortest ancestral path of two subsets of vertices <i>A</i> and <i>B</i> which is a shortest ancestral
+     * Computes length with the shortest ancestral path of two subsets of vertices <i>A</i> and <i>B</i> which is the shortest ancestral
      * path over all pairs of vertices <i>v</i> and <i>w</i>, with <i>v</i> in <i>A</i> and <i>w</i> in <i>B</i>.
      *
      * @param V vertices of a digraph from subset <i>A</i>
      * @param W vertices of a digraph from subset <i>B</i>
-     * @return length of shortest ancestral path between <i>v</i> and <i>w</i>;
+     * @return length of the shortest ancestral path between <i>v</i> and <i>w</i>;
      * <i>'-1'</i> - if no such path exists
      * @throws IllegalArgumentException if any vertex argument is outside its prescribed range or Iterable argument is null
      */
@@ -135,12 +127,6 @@ public class SAP {
 
         for (Integer j : W) sB.push(j);
         for (Integer j : sB) subsetB.add(j);
-
-        // if ((compareIterables(v, V_subset) && compareIterables(w, W_subset)) ||
-        //     (compareIterables(v, W_subset) && compareIterables(w, V_subset)))  return lengthSAP == INFINITY ? -1 : lengthSAP;
-        // lengthSAP = INFINITY;
-        // shortestCommonAncestor = -1;
-        // ancestor(v, w);
 
         runBFS(subsetA, subsetB);
         return lengthSAP == INFINITY ? -1 : lengthSAP;
@@ -178,8 +164,8 @@ public class SAP {
     }
 
     /**
-     * Computes a shortest common ancestor of two subsets of vertices <i>A</i> and <i>B</i>
-     * that participates in a shortest ancestral path;
+     * Computes the shortest common ancestor of two subsets of vertices <i>A</i> and <i>B</i>
+     * that participates in the shortest ancestral path;
      *
      * @param V vertices of a digraph from subset <i>A</i>
      * @param W vertices of a digraph from subset <i>B</i>
@@ -217,8 +203,8 @@ public class SAP {
         lengthSAP = INFINITY;
         shortestCommonAncestor = -1;
 
-        // In case of any common element between two given subsets of vertices A and B ,-
-        // return it as a shortest common ancestor with length of shortest ancestral path equal to 0
+        // In case of any common element between two given subsets of vertices A and B,-
+        // return it as the shortest common ancestor with the length of the shortest ancestral path equal to 0
         int commonElement = findAnyCommonElement(v_subset, w_subset);
         if (commonElement != -1) {
             lengthSAP = 0;
@@ -275,7 +261,7 @@ public class SAP {
             if (isSAP) break;
         }
 
-        // *** uncomment for debug - crearte a file with representation of this digraph (only marked vertices!!!) in DOT format,
+        // *** uncomment for debug - create a file with representation of this digraph (only marked vertices!!!) in DOT format,
         //  suitable for visualization with Graphviz.
         // Out out = new Out("digraph-wordnet_sub.dot");
         // String s = "digraph {" + "\n"
@@ -402,7 +388,7 @@ public class SAP {
         Digraph G = new Digraph(in);
         SAP sap = new SAP(G);
 
-        // version of `Digraph` type with method of "DOT format" represantation is not suitable for Corsera grading
+        // version of `Digraph` type with method of "DOT format" representation is not suitable for Coursera grading
         // for debug purpose
         // StdOut.println("String representation of this digraph in DOT format: " + "\n" + sap.getGraphInDOT());
         // Out out = new Out("digraph3.dot");

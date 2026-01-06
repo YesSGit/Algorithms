@@ -15,7 +15,7 @@ import edu.princeton.cs.algs4.Topological;
  *  <p><b>Performance requirements:</b></p>
  *  <ul>
  *    <li><b>Space:</b> The {@code WordNet} object uses space linear in the input size
- *        (the size of the synsets and hypernyms files).</li>
+ *        (the size of the 'synsets' and 'hypernyms' files).</li>
  *    <li><b>Constructor:</b> Takes time linearithmic in the input size.</li>
  *    <li><b>isNoun():</b> Runs in time logarithmic (or constant on average) in the number of nouns.</li>
  *    <li><b>distance() and sap():</b> Run in time linear in the size of the {@code WordNet} digraph.</li>
@@ -37,16 +37,15 @@ import edu.princeton.cs.algs4.Topological;
  *  @since May 2025
  */
 public class WordNet {
-    // private static final String NEWLINE = System.getProperty("line.separator");
-    private static final int INFINITY = Integer.MAX_VALUE;
-    // private String graphInDOT;  //  representation of digraph in DOT format
+     private static final int INFINITY = Integer.MAX_VALUE;
+    // private String graphInDOT;  // representation of digraph in DOT format
 
     // symbol table which represents for each noun all synsets id where this noun appears
     private SeparateChainingHashST<String, Bag<Integer>> synsetsST;
     private int synsetsN;           // number of synsets in the input file
     private String[] synsetsByID;   // array which represents all sysnsets from input file (index is sysnset's id)
 
-    // number of roots - wether the input to the constructor does correspond to a rooted DAG?
+    // number of roots - whether the input to the constructor does correspond to a rooted DAG?
     private int rootsN;
 
     // immutable data type for finding a SAP (shortest ancestral path) object for the given directed graph.
@@ -81,9 +80,9 @@ public class WordNet {
     }
 
     /**
-     * Reads in and parses input file, builds symbol table of {@code String, Bag<Integer>}  key-value pairs
-     * which represents list of noun synsets from input file, where key is the unique noun from all
-     * of the synonym sets and value is a set of synsets <i>id</i> where the noun is appeared
+     * Reads in and parses an input file, builds symbol table of {@code String, Bag<Integer>}  key-value pairs
+     * which represents a list of noun synsets from an input file, where key is the unique noun from all
+     *  the synonym sets and value is a set of synsets <i>id</i> where the noun is appeared
      * (once for each meaning that the noun has).
      *
      * @param synsets name of input file contains list of noun synsets, one per line.
@@ -119,7 +118,6 @@ public class WordNet {
                     bag.add(id);
                     synsetsST.put(synset[i], bag);
                 }
-
             }
         }
         if (synsetsN < synsetsByID.length) {
@@ -128,10 +126,10 @@ public class WordNet {
     }
 
     /**
-     * Reads in and parses input file, builds WordNet digraph: each vertex <i>v</i> is an integer that represents a synset,
+     * Reads in and parses an input file, builds WordNet digraph: each vertex <i>v</i> is an integer that represents a synset,
      * and each directed edge <i>v→w</i> represents that <i>w</i> is a hypernym of <i>v</i>.
      * The WordNet digraph is a rooted DAG: it is acyclic and has one vertex—the <i>root</i> — that is an ancestor of every other vertex.
-     * @param hypernyms name of input file contains the hypernym relationships.
+     * @param hypernyms the name of an input file contains the hypernym relationships.
      */
     private boolean readHypernyms(String hypernyms) {
         // WordNet digraph: each vertex v is an integer that represents a synset,
@@ -157,12 +155,22 @@ public class WordNet {
         // graphInDOT = wordNet.toDot();
         // Out out = new Out("digraph-wordnet50000.txt");
         // out.println(wordNet.toString());
+
         return topo.hasOrder();
     }
 
-    /**
+     /**
+     * Returns an iterable containing all unique nouns in the WordNet semantic lexicon.
      *
-     * @return all WordNet nouns
+     * <p><b>Performance requirements:</b> Takes time proportional to the total
+     * number of nouns in the WordNet lexicon.</p>
+     *
+     * <p><b>Dependencies:</b></p>
+     * <ul>
+     *   <li>{@code edu.princeton.cs.algs4.Queue}</li>
+     * </ul>
+     *
+     * @return all WordNet nouns as an {@code Iterable<String>}
      */
     public Iterable<String> nouns() {
         Queue<String> queNouns = new  Queue<>();
@@ -202,8 +210,6 @@ public class WordNet {
             this.wordA = nounA;
             this.wordB = nounB;
 
-            // if (sap == null) sap = new SAP(wordNet);
-            // commonAncestorSynset = synsetsByID[sap.ancestor(synsetsST.get(nounA), synsetsST.get(nounB))];
             sapDistance = sap.length(synsetsST.get(nounA), synsetsST.get(nounB));
         }
         return sapDistance;
@@ -211,7 +217,7 @@ public class WordNet {
 
     /**
      * Finds a synset (second field of 'synsets' input file) that is the common ancestor of nounA and nounB
-     * in a shortest ancestral path.
+     * in the shortest ancestral path.
      *
      * @param nounA a WordNet noun
      * @param nounB a WordNet noun
@@ -239,7 +245,7 @@ public class WordNet {
 
     private void validateNoun(String noun) {
         if (noun == null) throw new IllegalArgumentException("The input 'noun' cannot be null");
-        if (!synsetsST.contains(noun)) {
+        if (!isNoun(noun)) {
             throw new IllegalArgumentException("The input 'noun' does not correspond to a synset.");
         }
     }
@@ -270,8 +276,7 @@ public class WordNet {
         // StdOut.println("String representation of this digraph in DOT format: " + NEWLINE + wordNet.getGraphInDOT());
         // Out out = new Out("digraph.dot");
         // out.println(wordNet.getGraphInDOT());
-
-        // wordNet.nouns().forEach(StdOut::println);
+        wordNet.nouns().forEach(StdOut::println);
         // StdOut.println(wordNet.nouns().toString());
 
         StdOut.println("Shortest common ancestor of '" + nounA + "' and '" + nounB + "' in a shortest ancestral path is the synset: '"
@@ -285,15 +290,5 @@ public class WordNet {
         StdOut.println("Distance between '" + nounA + "' and '" + nounB + "' is: " + wordNet.distance(nounA, nounB));
         StdOut.println("Shortest common ancestor of '" + nounA + "' and '" + nounB + "' in a shortest ancestral path is the synset: '"
                                + wordNet.sap(nounA, nounB) + "'");
-
-        // nounA = "magnetic_flux_unit";
-        // nounB = "effectuality";
-        // StdOut.println("Shortest common ancestor of '" + nounA + "' and '" + nounB + "' in a shortest ancestral path is the synset: '"
-        //                        + wordNet.sap(nounA, nounB) + "'");
-        // StdOut.println("Distance between '" + nounA + "' and '" + nounB + "' is: " + wordNet.distance(nounA, nounB));
-        // // wordNet.commonAncestorSynset = "entity";
-        // StdOut.println("Shortest common ancestor of '" + nounA + "' and '" + nounB + "' in a shortest ancestral path is the synset: '"
-        //                        + wordNet.sap(nounA, nounB) + "'");
-        // StdOut.println("Distance between '" + nounA + "' and '" + nounB + "' is: " + wordNet.distance(nounA, nounB));
     }
 }

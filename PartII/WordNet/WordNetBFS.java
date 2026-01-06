@@ -5,16 +5,16 @@ import edu.princeton.cs.algs4.Stack;
 
 /**
  *  The {@code WordNetBFS} class represents an adopted version of
- *  BFS data type to help finding an ancestral path between two vertices v and w in a digraph -
+ *  a BFS data type to help finding an ancestral path between two vertices v and w in a digraph -
  *  it's a directed path from v to a common ancestor x, together with a
- *  directed path from w to the same ancestor x. A shortest ancestral
+ *  directed path from w to the same ancestor x. The shortest ancestral
  *  path is an ancestral path of minimum total length.
- *  'Common ancestor' in a shortest ancestral path is a shortest common ancestor.
+ *  'Common ancestor' in the shortest ancestral path is the shortest common ancestor.
  *  An ancestral path is a path, but not a directed path.
  *  <p>
  *  This implementation uses breadth-first search.
- *  The constructor takes time proportional to <em>V</em> + <em>E</em>,
- *  where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
+ *  The constructor takes time proportional to <em>O(V)</em>,
+ *  where <em>V</em> is the number of vertices.
  *  Each call to {@link #distTo(int)} and {@link #hasPathTo(int)} takes constant time;
  *  each call to {@link #pathTo(int)} takes time proportional to the length
  *  of the path.
@@ -24,7 +24,8 @@ import edu.princeton.cs.algs4.Stack;
  *    <li>{@code SAP} (Shortest Ancestral Path data type)</li>
  *    </ul>
  *  @author Serhii Yeshchenko
- *  Date: Sep'2025
+ *  @version 1.0
+ *  @since September 2025
  */
 public class WordNetBFS {
     private static final int INFINITY = Integer.MAX_VALUE;
@@ -70,7 +71,7 @@ public class WordNetBFS {
      * and <em>B</em>  where <em>A</em> represents an 'id' of nounA synset in {@code WordNet} and <em>B</em> -
      * 'id' of nounB synset, respectively.
      * Each call gatheres adjacent vertices of the vertex, starting from source parameter, and proceeds with all
-     * vertices, which are in the BFS queue and have the same distance (number of edges in a shortest path) to the
+     * vertices, which are in the BFS queue and have the same distance (number of edges in the shortest path) to the
      * source vertex <em>A</em> or source vertex <em>B</em>.
      * Dependencies: SAP.java, method 'runBFS'.
      *
@@ -139,7 +140,7 @@ public class WordNetBFS {
 
     /**
      * Initializes the BFS queue and sets up the necessary state for starting a BFS traversal
-     * from a specified sources vertices. Marks the source vertices as visited, sets their distance
+     * from specified source vertices. Marks the source vertices as visited, sets their distance
      * to zero, and enqueues them into the BFS processing queue while recording it in the BFS
      * tracking stack.
      *
@@ -161,15 +162,16 @@ public class WordNetBFS {
     /**
      * Resets the internal state of the BFS tracking mechanism by clearing all recorded vertices,
      * reinitializing related arrays, and preparing for a fresh BFS computation.
-     * Note(!): re-initializing only those entries that changed in the previous computation.
-     *
-     * This method performs the following actions:
-     * - Empties the stack used for tracking visited vertices during BFS.
-     * - Resets the {@code marked} array to mark all vertices as unvisited.
-     * - Sets all distances in the {@code distTo} array to {@code INFINITY}.
-     * - Resets the {@code edgeTo} array to clear references to preceding vertices.
+     * <p>
+     * Note(!): re-initializing only those entries that have been changed in the previous computation.
+     * <p>
+     * This method performs the following actions: <p>
+     * - Empties the stack used for tracking visited vertices during BFS.<p>
+     * - Resets the {@code marked} array to mark all vertices as unvisited. <p>
+     * - Sets all distances in the {@code distTo} array to {@code INFINITY}. <p>
+     * - Resets the {@code edgeTo} array to clear references to preceding vertices. <p>
      * - Reinitializes the BFS queue to an empty state.
-     *
+     * <p>
      * The method ensures that the BFS-related data structures are fully reset to their initial states,
      * allowing a new BFS computation to begin without interference from previous computations
      * and at the same time avoiding performance bottleneck operation of re-initializing all arrays of length V.
@@ -199,10 +201,10 @@ public class WordNetBFS {
     }
 
     /**
-     * Returns the number of edges in a shortest path from the source {@code s}
+     * Returns the number of edges in the shortest path from the source {@code s}
      * (or sources) to vertex {@code v}?
      * @param v the vertex
-     * @return the number of edges in a shortest path
+     * @return the number of edges in the shortest path
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int distTo(int v) {
@@ -211,10 +213,10 @@ public class WordNetBFS {
     }
 
     /**
-     * Returns a shortest path from {@code s} (or sources) to {@code v}, or
+     * Returns the shortest path from {@code s} (or sources) to {@code v}, or
      * {@code null} if no such path.
      * @param v the vertex
-     * @return the sequence of vertices on a shortest path, as an Iterable
+     * @return the sequence of vertices on the shortest path, as an Iterable
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public Iterable<Integer> pathTo(int v) {
@@ -239,8 +241,6 @@ public class WordNetBFS {
         if (v < 0 || v >= V)
             throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
     }
-
-    // throw an IllegalArgumentException if vertices is null or unless {@code 0 <= v < V}
 
     /**
      * Validates digraph vertices
